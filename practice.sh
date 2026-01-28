@@ -96,15 +96,13 @@ server {
 }
 EOF
 
-cat > /home/student/podman-compose.yml 
-
-# Start the containers using Podman Compose
 
 echo "Pull a image from docker.io"
-sudo -u student docker pull docker.io/library/mariadb
+echo 'redhat321' | podman login -u admin034 --password-stdin
+
+sudo podman pull docker.io/library/mariadb
 
 echo "Logging into Docker registry as student..."
-sudo -u student bash -c 'echo "redhat321" | podman login docker.io -u admin034 --password-stdin'
 
 # Step 6: Install httpd, enable and start the service
 echo "Installing httpd server..."
