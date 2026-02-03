@@ -119,7 +119,7 @@ http {
     server {
         listen       8080 default_server;
         server_name  _;
-        root         /usr/share/nginx/html/public;
+        root         /usr/share/nginx/html/;
 
         # Load configuration files for the default server block.
         include /etc/nginx/default.d/*.conf;
