@@ -79,26 +79,71 @@ echo "<html><body><h1>Im running successfully man all the best for your exams" >
 # Step 1: Create the default.conf for Nginx
 echo "Creating default.conf for Nginx"
 cat > /home/student/projects/nginx_web/conf/default.conf <<EOF
-server {
-    listen       80;
-    server_name  localhost;
+# For more information on configuration, see:
+#   * Official English Documentation: http://nginx.org/en/docs/
+#   * Official Russian Documentation: http://nginx.org/ru/docs/
 
-    # Define the root directory where the HTML files are mounted
-    root   /usr/share/nginx/html;
 
-    # Default page for the server
-    index  index.html;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
 
-    # Main location block to serve files
-    location / {
-        try_files \$uri \$uri/ =404;
+# Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    # Load modular configuration files from the /etc/nginx/conf.d directory.
+    # See http://nginx.org/en/docs/ngx_core_module.html#include
+    # for more information.
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+        listen       8080 default_server;
+        server_name  _;
+        root         /usr/share/nginx/html/public;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+        location / {
+        }
+
+        error_page 404 /404.html;
+            location = /40x.html {
+        }
+
+        error_page 500 502 503 504 /50x.html;
+            location = /50x.html {
+        }
     }
 }
 EOF
 
 
-echo "Pull a image from docker.io"
-echo 'redhat321' | podman login -u admin034 --password-stdin
+echo "Logging into Docker registry as student..."
+sudo -u student bash -c 'echo "redhat321" | podman login docker.io -u admin034 --password-stdin'
+
+sudo -u student bash -c 'echo "developer" | podman login registry.ocp4.example.com:8443 -u developer --password-stdin'
+
 
 sudo podman pull docker.io/library/mariadb
 
